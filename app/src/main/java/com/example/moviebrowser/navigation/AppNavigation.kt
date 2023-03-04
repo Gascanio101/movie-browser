@@ -1,0 +1,19 @@
+package com.example.moviebrowser.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.moviebrowser.screens.AppViewModel
+import com.example.moviebrowser.screens.FavScreen
+import com.example.moviebrowser.screens.HomeScreen
+
+@Composable
+fun AppNavigation(vm: AppViewModel) {
+    val navigationController = rememberNavController()
+//    var index by rememberSaveable { mutableStateOf(0) }
+    NavHost(navController = navigationController, startDestination = Routes.Home.route) {
+        composable(Routes.Home.route) { HomeScreen(navigationController, vm) }
+        composable(Routes.Favourite.route) { FavScreen(navigationController, vm)}
+    }
+}
