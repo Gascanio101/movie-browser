@@ -34,7 +34,7 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
 fun MyBottomNavigation(navigationController: NavController, vm: AppViewModel) {
 
     val index: Int by vm.index.observeAsState(initial = 0)
-    
+
     BottomAppBar(backgroundColor = primaryColor, contentColor = Color.White) {
         BottomNavigationItem(
             selected = index == 0,

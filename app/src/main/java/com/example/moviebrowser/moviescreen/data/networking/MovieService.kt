@@ -7,11 +7,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MovieService {
-    private val retrofit = RetrofitHelper.getRetrofit()
-    suspend fun getPopularMovies(): PopularMoviesResponse? {
+    val retrofit = RetrofitHelper.getRetrofit()
+
+    /*suspend fun getPopularMovies(): PopularMoviesResponse? {
         return withContext(Dispatchers.IO) {
-            val response = retrofit.create(MoviesClient::class.java).getPopularMovies()
+            val response = retrofit
             response.body()
         }
-    }
+    }*/
 }

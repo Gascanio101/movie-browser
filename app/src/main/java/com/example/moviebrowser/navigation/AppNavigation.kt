@@ -11,7 +11,6 @@ import com.example.moviebrowser.moviescreen.HomeScreen
 @Composable
 fun AppNavigation(vm: AppViewModel) {
     val navigationController = rememberNavController()
-//    var index by rememberSaveable { mutableStateOf(0) }
     NavHost(navController = navigationController, startDestination = Routes.Home.route) {
         composable(Routes.Home.route) { HomeScreen(navigationController, vm) }
         composable(Routes.Favourite.route) { FavScreen(navigationController, vm)}

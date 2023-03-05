@@ -5,7 +5,4 @@ import com.example.moviebrowser.moviescreen.data.networking.response.PopularMovi
 
 class MoviesRepository {
     private val api = MovieService()
-    suspend fun getPopularMovies(): PopularMoviesResponse? {
-        return api.getPopularMovies()
-    }
 }
