@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.moviebrowser.screens.AppViewModel
-import com.example.moviebrowser.screens.FavScreen
-import com.example.moviebrowser.screens.HomeScreen
+import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
+import com.example.moviebrowser.moviescreen.FavScreen
+import com.example.moviebrowser.moviescreen.HomeScreen
 
 @Composable
 fun AppNavigation(vm: AppViewModel) {

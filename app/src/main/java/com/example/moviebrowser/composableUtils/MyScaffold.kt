@@ -9,9 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
-import com.example.moviebrowser.Utils
-import com.example.moviebrowser.screens.*
+import com.example.moviebrowser.core.utils.Colors.Companion.primaryColor
+import com.example.moviebrowser.moviescreen.*
+import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
+import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 
 @Composable
 fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
@@ -21,7 +24,7 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
         bottomBar = { MyBottomNavigation(navigationController, vm) }
     ) {
         when (vm.index.value) {
-            0 -> HomeBox()
+            0 -> HomeBox(vm)
             1 -> FavouriteBox()
         }
     }
@@ -32,7 +35,7 @@ fun MyBottomNavigation(navigationController: NavController, vm: AppViewModel) {
 
     val index: Int by vm.index.observeAsState(initial = 0)
     
-    BottomAppBar(backgroundColor = Utils.primaryColor, contentColor = Color.White) {
+    BottomAppBar(backgroundColor = primaryColor, contentColor = Color.White) {
         BottomNavigationItem(
             selected = index == 0,
             onClick = {
@@ -56,7 +59,7 @@ fun MyBottomNavigation(navigationController: NavController, vm: AppViewModel) {
 @Composable
 fun MyTopAppBar() {
     TopAppBar(
-        backgroundColor = Utils.primaryColor,
+        backgroundColor = primaryColor,
         contentColor = Color.White,
         title = { Text(text = "Movie Browser") },
         actions = {

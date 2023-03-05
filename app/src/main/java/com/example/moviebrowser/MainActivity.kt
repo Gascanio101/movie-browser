@@ -9,11 +9,8 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.moviebrowser.navigation.AppNavigation
-import com.example.moviebrowser.screens.AppViewModel
+import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import com.example.moviebrowser.ui.theme.MovieBrowserTheme
 
 class MainActivity : ComponentActivity() {
