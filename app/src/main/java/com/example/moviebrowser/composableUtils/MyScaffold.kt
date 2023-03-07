@@ -59,7 +59,10 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
                 onSearchClicked = {
                     vm.searchMovie(it)
                     vm.updateSearchedMoviesState(SearchedMoviesState.SHOW)
-                    Log.d("gabs", "Searched text = $it")
+                    if(index == 1) {
+                        vm.indexScreen.value = 0
+                    }
+
                 },
                 onSearchTriggered = { vm.updateSearchWidgetState(SearchWidgetState.OPENED) }
             )

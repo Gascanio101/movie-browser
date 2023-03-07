@@ -144,7 +144,7 @@ fun MovieItem(
         Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(16.dp),
+            .padding(8.dp),
         border = BorderStroke(2.dp, color = primaryColor),
         shape = RoundedCornerShape(16.dp)
     ) {
