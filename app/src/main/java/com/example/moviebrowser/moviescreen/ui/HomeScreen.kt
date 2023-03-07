@@ -19,18 +19,21 @@ import com.example.moviebrowser.core.utils.Colors.Companion.backgroundColor
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import android.util.Log
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -40,6 +43,8 @@ import com.example.moviebrowser.R
 import com.example.moviebrowser.core.utils.Colors.Companion.primaryColor
 import com.example.moviebrowser.core.utils.SearchedMoviesState
 import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 @Composable
 fun HomeScreen(navController: NavController, vm: AppViewModel) {
@@ -57,19 +62,68 @@ fun HomeBox(vm: AppViewModel, searchedMoviesState: SearchedMoviesState) {
             .background(backgroundColor)
             .padding(bottom = 48.dp)
     ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            when (searchedMoviesState) {
-                SearchedMoviesState.HIDE -> {
-                    items(vm.movieList.value.sortedByDescending { it.voteAverage }) { movie ->
-                        if (vm.favouriteIdList.value.contains(movie.id)) {
-                            MovieItem(movie, true) { vm.saveMovie(it) }
-                        } else MovieItem(movie) { vm.saveMovie(it) }
+        when (vm.isLoading.value) {
+            true -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                    CircularProgressIndicator(color = primaryColor)
+                }
+            }
+            false -> {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    when (searchedMoviesState) {
+                        SearchedMoviesState.HIDE -> {
+                            items(vm.movieList.value.sortedByDescending { it.voteAverage }) { movie ->
+                                if (vm.favouriteIdList.value.contains(movie.id)) {
+                                    MovieItem(movie, true) { vm.saveMovie(it) }
+                                } else MovieItem(movie) { vm.saveMovie(it) }
 
+                            }
+                        }
+                        SearchedMoviesState.SHOW -> {
+                            items(vm.searchedMovies.value) { movie ->
+                                MovieItem(movie) { vm.saveMovie(it) }
+                            }
+                        }
                     }
                 }
-                SearchedMoviesState.SHOW -> {
-                    items(vm.searchedMovies.value) { movie ->
-                        MovieItem(movie) { vm.saveMovie(it) }
+            }
+        }
+    }
+}
+
+@Composable
+fun FavouriteBox(vm: AppViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+            .padding(bottom = 48.dp)
+    ) {
+        when (vm.isLoading.value) {
+            true -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                    CircularProgressIndicator(color = primaryColor)
+                }
+            }
+            false -> {
+                if (vm.favouriteMovieList.value.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+                        Text("No favourite movies, add some!")
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(vm.favouriteMovieList.value) { movie ->
+                            if (vm.favouriteIdList.value.contains(movie.id)) {
+                                vm.showFavourite(true)
+                                MovieItem(movie, vm.isFavourite.value) {
+                                    vm.saveMovie(it)
+                                    vm.isFavourite.value = false
+                                }
+                            } else MovieItem(movie) {
+                                vm.saveMovie(it)
+                                vm.isFavourite.value = true
+                            }
+                        }
                     }
                 }
             }
@@ -103,7 +157,9 @@ fun MovieItem(
         ) {
 
             val imageUrl = "https://image.tmdb.org/t/p/w1280" + movie.backdropPath
-            // https://image.tmdb.org/t/p/w500/22z44LPkMyf5nyyXvv8qQLsbom.jpg
+            val df = DecimalFormat("#.#")
+            df.roundingMode = RoundingMode.CEILING
+            val roundedVoteAverage = df.format(movie.voteAverage)
 
             AsyncImage(
                 model = imageUrl,
@@ -133,17 +189,12 @@ fun MovieItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = movie.voteAverage.toString() + "/10",
+                            text = "$roundedVoteAverage/10",
                             fontSize = 18.sp,
                             color = Color.White
                         )
                     }
-                    /*Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "favourite",
-                        tint = Color.White,
-                        modifier = Modifier.clickable { onFavouriteClick(movie.id) }
-                    )*/
+
                     when (localIsFavourite) {
                         true -> Icon(
                             imageVector = Icons.Filled.Favorite,
@@ -172,29 +223,3 @@ fun MovieItem(
     }
 }
 
-@Composable
-fun FavouriteBox(vm: AppViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .padding(bottom = 48.dp)
-    ) {
-//        vm.getFavouriteMovies(favList)
-
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(vm.favouriteMovieList.value) { movie ->
-                if (vm.favouriteIdList.value.contains(movie.id)) {
-                    vm.showFavourite(true)
-                    MovieItem(movie, vm.isFavourite.value) {
-                        vm.saveMovie(it)
-                        vm.isFavourite.value = false
-                    }
-                } else MovieItem(movie) {
-                    vm.saveMovie(it)
-                    vm.isFavourite.value = true
-                }
-            }
-        }
-    }
-}

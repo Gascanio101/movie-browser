@@ -67,9 +67,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val _isFavourite: MutableState<Boolean> = mutableStateOf(false)
     val isFavourite = _isFavourite
 
-    fun showFavourite(isFavourite: Boolean) {
-        _isFavourite.value = isFavourite
-    }
+    private val _isLoading: MutableState<Boolean> = mutableStateOf(false)
+    val isLoading = _isLoading
 
     private val _movieList: MutableState<List<PopularMoviesResponse.Result>> =
         mutableStateOf(listOf())
@@ -82,10 +81,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val _favouriteMovieList: MutableState<List<PopularMoviesResponse.Result>> =
         mutableStateOf(listOf())
     val favouriteMovieList = _favouriteMovieList
-
-/*private val _favouriteMovie: MutableState<Int> =
-    mutableStateOf(0)
-val favouriteMovie = _favouriteMovie*/
 
     private val _searchedMovies: MutableState<List<PopularMoviesResponse.Result>> =
         mutableStateOf(listOf())
@@ -103,18 +98,9 @@ val favouriteMovie = _favouriteMovie*/
         mutableStateOf(value = SearchedMoviesState.HIDE)
     val searchedMoviesState = _searchedMoviesState
 
-/*fun updateFavouriteIdList(favList: List<Int>) {
-    _favouriteIdList.value = favList
-}*/
-
-/*fun addFavouriteMovie(id: Int) {
-    _favouriteMovie.value = id
-}
-
-fun clearFavouriteMovie() {
-    _favouriteMovie.value = 0
-}*/
-
+    fun showFavourite(isFavourite: Boolean) {
+        _isFavourite.value = isFavourite
+    }
     fun updateSearchedMoviesState(newvalue: SearchedMoviesState) {
         _searchedMoviesState.value = newvalue
     }
@@ -134,7 +120,7 @@ fun clearFavouriteMovie() {
     fun getPopularMovies() {
         viewModelScope.launch {
             val response = RetrofitHelper.getRetrofit()
-                .getPopularMovies(api_key = Constants.API_KEY, page = 10)
+                .getPopularMovies(api_key = Constants.API_KEY)
             if (response.isSuccessful) {
                 _movieList.value = response.body()!!.results
             }
@@ -143,6 +129,7 @@ fun clearFavouriteMovie() {
 
     fun searchMovie(query: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             val encodedQuery = URLEncoder.encode(query, "UTF-8")
             val response =
                 RetrofitHelper.getRetrofit().searchMovies(Constants.API_KEY, encodedQuery)
@@ -150,11 +137,13 @@ fun clearFavouriteMovie() {
                 Log.d("gabs", "searchMovie: success")
                 _searchedMovies.value = response.body()!!.results
             } else Log.d("gabs", "searchMovie: error")
+            _isLoading.value = false
         }
     }
 
     fun getFavouriteMovies(id: List<Int>) {
         viewModelScope.launch {
+            _isLoading.value = true
             val tempList = mutableListOf<PopularMoviesResponse.Result>()
             id.forEach {
                 Log.d("gabs", "movies ids sent out: $it")
@@ -166,6 +155,7 @@ fun clearFavouriteMovie() {
                 }
             }
             _favouriteMovieList.value = tempList
+            _isLoading.value = false
         }
     }
 }

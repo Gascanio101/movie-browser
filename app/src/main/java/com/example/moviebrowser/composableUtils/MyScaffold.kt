@@ -37,12 +37,17 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
     val searchedMovies by vm.searchedMoviesState
     val index by vm.indexScreen
     vm.loadFavMoviesIds()
-
-//    Log.d("gabs", "MyScaffold: list of Ids: $favList")
+    val topBarTitle = when(index) {
+        0 -> "Popular Movies"
+        1 -> "Favourite Movies"
+        else -> ""
+    }
 
     Scaffold(
         topBar = {
             MainAppTopBar(
+                vm = vm,
+                title = topBarTitle,
                 searchWidgetState = searchWidgetState,
                 searchTextState = searchTextState,
                 onTextChange = { vm.updateSearchTextState(it) },
@@ -52,7 +57,6 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
                     vm.updateSearchedMoviesState(SearchedMoviesState.HIDE)
                 },
                 onSearchClicked = {
-                    // TODO: Update viewmodel with the search query that will consume the API and return the proper movie
                     vm.searchMovie(it)
                     vm.updateSearchedMoviesState(SearchedMoviesState.SHOW)
                     Log.d("gabs", "Searched text = $it")
@@ -96,11 +100,11 @@ fun MyBottomNavigation(navigationController: NavController, vm: AppViewModel, in
 }
 
 @Composable
-fun DefaultTopAppBar(onSearchClicked: () -> Unit) {
+fun DefaultTopAppBar(title: String, onSearchClicked: () -> Unit) {
     TopAppBar(
         backgroundColor = primaryColor,
         contentColor = Color.White,
-        title = { Text(text = "Popular Movies") },
+        title = { Text(title) },
         actions = {
             IconButton(onClick = { onSearchClicked() }) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "search")
@@ -111,6 +115,8 @@ fun DefaultTopAppBar(onSearchClicked: () -> Unit) {
 
 @Composable
 fun MainAppTopBar(
+    vm: AppViewModel,
+    title: String,
     searchWidgetState: SearchWidgetState,
     searchTextState: String,
     onTextChange: (String) -> Unit,
@@ -120,7 +126,7 @@ fun MainAppTopBar(
 ) {
     when (searchWidgetState) {
         SearchWidgetState.CLOSED -> {
-            DefaultTopAppBar(onSearchClicked = onSearchTriggered)
+            DefaultTopAppBar(title, onSearchClicked = onSearchTriggered)
         }
         SearchWidgetState.OPENED -> {
             SearchAppBar(
