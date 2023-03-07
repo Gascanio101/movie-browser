@@ -1,29 +1,91 @@
 package com.example.moviebrowser.moviescreen.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviebrowser.core.networking.RetrofitHelper
 import com.example.moviebrowser.core.utils.Constants
 import com.example.moviebrowser.core.utils.SearchWidgetState
 import com.example.moviebrowser.core.utils.SearchedMoviesState
+import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.net.URLEncoder
+import java.util.*
 
-class AppViewModel: ViewModel() {
+class AppViewModel(app: Application) : AndroidViewModel(app) {
+
+
+    private val sharedPreferences =
+        app.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
+
+    fun saveMovie(id: Int) {
+        val allEntries = sharedPreferences.all
+        val idList = allEntries.values.mapNotNull { it as? Int }
+
+        if (idList.contains(id)) {
+            // The ID already exists, so remove it
+            val uuidToDelete = allEntries.filterValues { it == id }.keys.first()
+            val editor = sharedPreferences.edit()
+            editor.remove(uuidToDelete)
+            editor.apply()
+            favouriteMovieList.value = favouriteMovieList.value.filter { it.id != id }
+            Log.d("gabs", "onCreate: Movie already saved! DELETED!!!")
+        } else {
+            // The ID does not exist, so add it
+            val uuid = UUID.randomUUID().toString()
+            val editor = sharedPreferences.edit()
+            editor.putInt(uuid, id)
+            editor.apply()
+            Log.d("gabs", "onCreate: Added movie!")
+        }
+    }
+
+    fun loadFavMoviesIds() {
+        Log.d("gabs", "onCreate:Loaded movies!")
+        val allEntries = sharedPreferences.all
+        _favouriteIdList.value = allEntries.values.mapNotNull { it as? Int }
+        Log.d("gabs", "loadFavMoviesIds: $_favouriteIdList")
+        getFavouriteMovies(_favouriteIdList.value)
+    }
+
+    private fun clearSharedPreferences() {
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
+    }
 
     private val _indexScreen: MutableState<Int> = mutableStateOf(0)
     val indexScreen = _indexScreen
+
+    private val _isFavourite: MutableState<Boolean> = mutableStateOf(false)
+    val isFavourite = _isFavourite
+
+    fun showFavourite(isFavourite: Boolean) {
+        _isFavourite.value = isFavourite
+    }
 
     private val _movieList: MutableState<List<PopularMoviesResponse.Result>> =
         mutableStateOf(listOf())
     val movieList = _movieList
 
-//    val favouriteList = mutableStateOf(listOf<String>())
+    private val _favouriteIdList: MutableState<List<Int>> =
+        mutableStateOf(listOf())
+    val favouriteIdList = _favouriteIdList
+
+    private val _favouriteMovieList: MutableState<List<PopularMoviesResponse.Result>> =
+        mutableStateOf(listOf())
+    val favouriteMovieList = _favouriteMovieList
+
+/*private val _favouriteMovie: MutableState<Int> =
+    mutableStateOf(0)
+val favouriteMovie = _favouriteMovie*/
 
     private val _searchedMovies: MutableState<List<PopularMoviesResponse.Result>> =
         mutableStateOf(listOf())
@@ -41,6 +103,18 @@ class AppViewModel: ViewModel() {
         mutableStateOf(value = SearchedMoviesState.HIDE)
     val searchedMoviesState = _searchedMoviesState
 
+/*fun updateFavouriteIdList(favList: List<Int>) {
+    _favouriteIdList.value = favList
+}*/
+
+/*fun addFavouriteMovie(id: Int) {
+    _favouriteMovie.value = id
+}
+
+fun clearFavouriteMovie() {
+    _favouriteMovie.value = 0
+}*/
+
     fun updateSearchedMoviesState(newvalue: SearchedMoviesState) {
         _searchedMoviesState.value = newvalue
     }
@@ -53,29 +127,25 @@ class AppViewModel: ViewModel() {
         _searchTextState.value = newValue
     }
 
-
     fun onIndexChange(index: Int) {
         _indexScreen.value = index
     }
 
     fun getPopularMovies() {
         viewModelScope.launch {
-            // _isLoading = true
-            val response = RetrofitHelper.getRetrofit().getPopularMovies(Constants.API_KEY)
-            if(response.isSuccessful) {
+            val response = RetrofitHelper.getRetrofit()
+                .getPopularMovies(api_key = Constants.API_KEY, page = 10)
+            if (response.isSuccessful) {
                 _movieList.value = response.body()!!.results
             }
-            // _isLoading = false
         }
     }
 
-//            val encodedQuery = withContext(Dispatchers.IO) {
-//                URLEncoder.encode(query, "UTF-8")
-//            }
     fun searchMovie(query: String) {
         viewModelScope.launch {
             val encodedQuery = URLEncoder.encode(query, "UTF-8")
-            val response = RetrofitHelper.getRetrofit().searchMovie(Constants.API_KEY, encodedQuery)
+            val response =
+                RetrofitHelper.getRetrofit().searchMovies(Constants.API_KEY, encodedQuery)
             if (response.isSuccessful) {
                 Log.d("gabs", "searchMovie: success")
                 _searchedMovies.value = response.body()!!.results
@@ -83,9 +153,19 @@ class AppViewModel: ViewModel() {
         }
     }
 
-    /*fun getFavouriteMovies() {
+    fun getFavouriteMovies(id: List<Int>) {
         viewModelScope.launch {
-
+            val tempList = mutableListOf<PopularMoviesResponse.Result>()
+            id.forEach {
+                Log.d("gabs", "movies ids sent out: $it")
+                val response = RetrofitHelper.getRetrofit().searchMovieById(it, Constants.API_KEY)
+                Log.d("gabs", "getFavouriteMovies: $response")
+                if (response.isSuccessful) {
+                    val movieItem: PopularMoviesResponse.Result = response.body()!!
+                    tempList.add(movieItem)
+                }
+            }
+            _favouriteMovieList.value = tempList
         }
-    }*/
+    }
 }

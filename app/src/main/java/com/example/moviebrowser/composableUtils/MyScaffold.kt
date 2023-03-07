@@ -36,6 +36,9 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
     val searchTextState by vm.searchTextState
     val searchedMovies by vm.searchedMoviesState
     val index by vm.indexScreen
+    vm.loadFavMoviesIds()
+
+//    Log.d("gabs", "MyScaffold: list of Ids: $favList")
 
     Scaffold(
         topBar = {
@@ -61,7 +64,7 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
         content = {
             when (vm.indexScreen.value) {
                 0 -> HomeBox(vm, searchedMovies)
-                1 -> FavouriteBox()
+                1 -> FavouriteBox(vm)
             }
         }
     )
@@ -83,6 +86,7 @@ fun MyBottomNavigation(navigationController: NavController, vm: AppViewModel, in
         BottomNavigationItem(
             selected = index == 1,
             onClick = {
+//                vm.loadFavMoviesIds()
                 vm.onIndexChange(1)
                 navigationController.navigate("favouriteMovies")
             }, icon = {
@@ -96,7 +100,7 @@ fun DefaultTopAppBar(onSearchClicked: () -> Unit) {
     TopAppBar(
         backgroundColor = primaryColor,
         contentColor = Color.White,
-        title = { Text(text = "Movie Browser") },
+        title = { Text(text = "Popular Movies") },
         actions = {
             IconButton(onClick = { onSearchClicked() }) {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "search")
@@ -187,7 +191,7 @@ fun SearchAppBar(
             keyboardActions = KeyboardActions(onSearch = { onSearchClicked(text) }),
             colors = TextFieldDefaults.textFieldColors(
                 textColor = Color.White,
-                backgroundColor = Color.Transparent,
+                backgroundColor = primaryColor,
                 cursorColor = Color.White.copy(alpha = ContentAlpha.medium)
             )
         )

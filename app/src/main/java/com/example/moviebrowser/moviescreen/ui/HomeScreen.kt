@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,7 @@ import com.example.moviebrowser.core.utils.Colors.Companion.backgroundColor
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
@@ -25,14 +27,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.example.moviebrowser.R
 import com.example.moviebrowser.core.utils.Colors.Companion.primaryColor
 import com.example.moviebrowser.core.utils.SearchedMoviesState
+import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
 
 @Composable
 fun HomeScreen(navController: NavController, vm: AppViewModel) {
@@ -50,19 +57,19 @@ fun HomeBox(vm: AppViewModel, searchedMoviesState: SearchedMoviesState) {
             .background(backgroundColor)
             .padding(bottom = 48.dp)
     ) {
-        /* vm.movieList.value.forEach {
-             MovieItem(it)
-         }*/
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             when (searchedMoviesState) {
                 SearchedMoviesState.HIDE -> {
                     items(vm.movieList.value.sortedByDescending { it.voteAverage }) { movie ->
-                        MovieItem(movie)
+                        if (vm.favouriteIdList.value.contains(movie.id)) {
+                            MovieItem(movie, true) { vm.saveMovie(it) }
+                        } else MovieItem(movie) { vm.saveMovie(it) }
+
                     }
                 }
                 SearchedMoviesState.SHOW -> {
                     items(vm.searchedMovies.value) { movie ->
-                        MovieItem(movie)
+                        MovieItem(movie) { vm.saveMovie(it) }
                     }
                 }
             }
@@ -71,7 +78,14 @@ fun HomeBox(vm: AppViewModel, searchedMoviesState: SearchedMoviesState) {
 }
 
 @Composable
-fun MovieItem(movie: PopularMoviesResponse.Result) {
+fun MovieItem(
+    movie: PopularMoviesResponse.Result,
+    isFavourite: Boolean = false,
+    onFavouriteClick: (Int) -> Unit
+) {
+    var localIsFavourite by remember { mutableStateOf(isFavourite) }
+    val context = LocalContext.current
+
     Card(
         Modifier
             .fillMaxWidth()
@@ -123,18 +137,35 @@ fun MovieItem(movie: PopularMoviesResponse.Result) {
                             fontSize = 18.sp,
                             color = Color.White
                         )
-                        /*Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = "average vote",
-                            tint = Color.White,
-                        )*/
                     }
-                    Icon(
+                    /*Icon(
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = "favourite",
                         tint = Color.White,
-                        modifier = Modifier.clickable {  }
-                    )
+                        modifier = Modifier.clickable { onFavouriteClick(movie.id) }
+                    )*/
+                    when (localIsFavourite) {
+                        true -> Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = "favourite",
+                            tint = Color.White,
+                            modifier = Modifier.clickable {
+                                localIsFavourite = !localIsFavourite
+                                onFavouriteClick(movie.id)
+                                Toast.makeText(context, "Removed from favourites!", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                        false -> Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "favourite",
+                            tint = Color.White,
+                            modifier = Modifier.clickable {
+                                localIsFavourite = !localIsFavourite
+                                onFavouriteClick(movie.id)
+                                Toast.makeText(context, "Added to favourites!", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -142,12 +173,28 @@ fun MovieItem(movie: PopularMoviesResponse.Result) {
 }
 
 @Composable
-fun FavouriteBox() {
-    Box(
+fun FavouriteBox(vm: AppViewModel) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(backgroundColor)
+            .padding(bottom = 48.dp)
     ) {
-        Text(text = "Favourite Movies", modifier = Modifier.align(Alignment.Center))
+//        vm.getFavouriteMovies(favList)
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(vm.favouriteMovieList.value) { movie ->
+                if (vm.favouriteIdList.value.contains(movie.id)) {
+                    vm.showFavourite(true)
+                    MovieItem(movie, vm.isFavourite.value) {
+                        vm.saveMovie(it)
+                        vm.isFavourite.value = false
+                    }
+                } else MovieItem(movie) {
+                    vm.saveMovie(it)
+                    vm.isFavourite.value = true
+                }
+            }
+        }
     }
 }
