@@ -19,7 +19,6 @@ import com.example.moviebrowser.core.utils.Colors.Companion.backgroundColor
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import android.util.Log
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -42,7 +41,6 @@ import coil.compose.AsyncImage
 import com.example.moviebrowser.R
 import com.example.moviebrowser.core.utils.Colors.Companion.primaryColor
 import com.example.moviebrowser.core.utils.SearchedMoviesState
-import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -53,9 +51,13 @@ fun HomeScreen(navController: NavController, vm: AppViewModel) {
 }
 
 @Composable
+fun FavScreen(navController: NavController, vm: AppViewModel) {
+    MyScaffold(navigationController = navController, vm = vm)
+}
+
+@Composable
 fun HomeBox(vm: AppViewModel, searchedMoviesState: SearchedMoviesState) {
     Log.d("gabs", "HomeBox: first access")
-//    val movies: List<PopularMoviesResponse.Result> = vm.popularMoviesList.value ?: emptyList()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -222,4 +224,3 @@ fun MovieItem(
         }
     }
 }
-

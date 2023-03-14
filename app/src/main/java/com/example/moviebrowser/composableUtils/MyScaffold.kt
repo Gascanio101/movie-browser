@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -37,16 +38,16 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
     val searchedMovies by vm.searchedMoviesState
     val index by vm.indexScreen
     vm.loadFavMoviesIds()
-    val topBarTitle = when(index) {
+    val topBarTitle = when (index) {
         0 -> "Popular Movies"
         1 -> "Favourite Movies"
+        // For next tabs:
         else -> ""
     }
 
     Scaffold(
         topBar = {
             MainAppTopBar(
-                vm = vm,
                 title = topBarTitle,
                 searchWidgetState = searchWidgetState,
                 searchTextState = searchTextState,
@@ -59,10 +60,9 @@ fun MyScaffold(navigationController: NavController, vm: AppViewModel) {
                 onSearchClicked = {
                     vm.searchMovie(it)
                     vm.updateSearchedMoviesState(SearchedMoviesState.SHOW)
-                    if(index == 1) {
+                    if (index == 1) {
                         vm.indexScreen.value = 0
                     }
-
                 },
                 onSearchTriggered = { vm.updateSearchWidgetState(SearchWidgetState.OPENED) }
             )
@@ -118,7 +118,6 @@ fun DefaultTopAppBar(title: String, onSearchClicked: () -> Unit) {
 
 @Composable
 fun MainAppTopBar(
-    vm: AppViewModel,
     title: String,
     searchWidgetState: SearchWidgetState,
     searchTextState: String,
@@ -183,11 +182,8 @@ fun SearchAppBar(
             },
             trailingIcon = {
                 IconButton(onClick = {
-                    if (text.isNotEmpty()) {
-                        onTextChange("")
-                    } else {
-                        onCloseClicked()
-                    }
+                    if (text.isNotEmpty()) onTextChange("")
+                    else onCloseClicked()
                 }) {
                     Icon(
                         imageVector = Icons.Default.Close,

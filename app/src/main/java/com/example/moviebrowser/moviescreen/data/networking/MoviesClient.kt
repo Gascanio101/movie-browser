@@ -1,7 +1,5 @@
 package com.example.moviebrowser.moviescreen.data.networking
 
-import android.graphics.Movie
-import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import retrofit2.Response
 import retrofit2.http.GET

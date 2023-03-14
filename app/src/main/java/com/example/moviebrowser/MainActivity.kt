@@ -19,7 +19,6 @@ import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import com.example.moviebrowser.ui.theme.MovieBrowserTheme
 import java.util.*
 
-
 class MainActivity : ComponentActivity() {
 
     private val vm: AppViewModel by viewModels()
@@ -28,8 +27,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MovieBrowserTheme {
-
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background

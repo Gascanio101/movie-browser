@@ -12,15 +12,12 @@ import com.example.moviebrowser.core.networking.RetrofitHelper
 import com.example.moviebrowser.core.utils.Constants
 import com.example.moviebrowser.core.utils.SearchWidgetState
 import com.example.moviebrowser.core.utils.SearchedMoviesState
-import com.example.moviebrowser.moviescreen.data.networking.response.MovieDetails
 import com.example.moviebrowser.moviescreen.data.networking.response.PopularMoviesResponse
 import kotlinx.coroutines.launch
-import retrofit2.Response
 import java.net.URLEncoder
 import java.util.*
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
-
 
     private val sharedPreferences =
         app.getSharedPreferences("my_prefs", Context.MODE_PRIVATE)
