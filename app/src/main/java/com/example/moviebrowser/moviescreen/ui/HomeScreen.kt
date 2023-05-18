@@ -109,7 +109,7 @@ fun FavouriteBox(vm: AppViewModel) {
             }
             false -> {
                 if (vm.favouriteMovieList.value.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
                         Text("No favourite movies, add some!")
                     }
                 } else {
@@ -159,17 +159,25 @@ fun MovieItem(
         ) {
 
             val imageUrl = "https://image.tmdb.org/t/p/w1280" + movie.backdropPath
+
             val df = DecimalFormat("#.#")
             df.roundingMode = RoundingMode.CEILING
             val roundedVoteAverage = df.format(movie.voteAverage)
-
+            Log.i("gabs", "MovieItem: image url = $imageUrl")
+            Log.i("gabs2", "MovieItem: backdropPath = ${movie.backdropPath}")
             AsyncImage(
-                model = imageUrl,
+                model = if (imageUrl.contains("null")) {
+                    R.drawable.movie_placeholder
+                } else imageUrl,
                 contentDescription = "movie image",
                 placeholder = painterResource(R.drawable.movie_placeholder),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clickable {
+                        // TODO: Navigate to detail screen
+                        // TODO: Get data either from viewModel or passing it as arguments from here.
+                    },
                 contentScale = ContentScale.FillWidth
             )
             Text(
@@ -205,7 +213,11 @@ fun MovieItem(
                             modifier = Modifier.clickable {
                                 localIsFavourite = !localIsFavourite
                                 onFavouriteClick(movie.id)
-                                Toast.makeText(context, "Removed from favourites!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Removed from favourites!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         )
                         false -> Icon(
@@ -215,7 +227,8 @@ fun MovieItem(
                             modifier = Modifier.clickable {
                                 localIsFavourite = !localIsFavourite
                                 onFavouriteClick(movie.id)
-                                Toast.makeText(context, "Added to favourites!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Added to favourites!", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         )
                     }
