@@ -7,12 +7,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.moviebrowser.moviescreen.viewmodel.AppViewModel
 import com.example.moviebrowser.moviescreen.FavScreen
 import com.example.moviebrowser.moviescreen.HomeScreen
+import com.example.moviebrowser.moviescreen.ui.DetailScreen
 
 @Composable
 fun AppNavigation(vm: AppViewModel) {
     val navigationController = rememberNavController()
     NavHost(navController = navigationController, startDestination = Routes.Home.route) {
         composable(Routes.Home.route) { HomeScreen(navigationController, vm) }
-        composable(Routes.Favourite.route) { FavScreen(navigationController, vm)}
+        composable(Routes.Favourite.route) { FavScreen(navigationController, vm) }
+        composable(Routes.Details.route) { DetailScreen(navigationController, vm) }
     }
 }
